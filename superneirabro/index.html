@@ -1252,7 +1252,7 @@ let CH=CHARS[0],lives=3,nuts=0,score=0,state='title',checkpoint=2,camX=0,deadT=0
 let bossTries=5,timeLeft=200,timeTick=0,nutsForLife=0,record=+(store.get('snb-record')||0),winBonus=0,liftT=0,winShown=false,fireCD=0,fireBuf=0,shake=0,arena=false,introT=0;
 function loadSave(){try{const s=JSON.parse(store.get('snb-save2'));if(s&&typeof s.unlocked==='number')return s}catch(_){}return{unlocked:1,lvl:0,cp:false,char:0}}
 const save=loadSave();
-if(save.unlocked>=8&&!save.m3){save.unlocked=Math.max(save.unlocked,9);save.m3=1;try{localStorage.setItem('snb-save2',JSON.stringify(save))}catch(_){}}
+if(save.unlocked>=8&&!save.m3){save.unlocked=Math.max(save.unlocked,9);if(!save.lvl)save.lvl=8;save.m3=1;try{localStorage.setItem('snb-save2',JSON.stringify(save))}catch(_){}}
 function writeSave(){store.set('snb-save2',JSON.stringify(save))}
 
 function groundSpawnY(col){for(let r=3;r<ROWS;r++)if(SOLID.has(map[r][col]))return r*T-P.h;return 11*T-P.h}
