@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Juegos Neira</title>
+<meta name="theme-color" content="#1e6fe0">
+<style>
+html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#1e6fe0,#7b2ff7 60%,#ff4d6d);color:#fff}
+header{text-align:center;padding:26px 16px 6px}
+h1{margin:0;font:italic 44px Impact,'Arial Narrow',sans-serif;letter-spacing:2px;text-shadow:3px 3px 0 #0008}
+header p{margin:6px 0 0;opacity:.9}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;padding:18px;max-width:900px;margin:0 auto}
+a.game{display:block;text-decoration:none;color:#fff;border-radius:18px;overflow:hidden;background:#0008;box-shadow:0 8px 24px #0006;transition:transform .15s}
+a.game:active{transform:scale(.97)}
+.cover{height:130px;display:flex;align-items:center;justify-content:center;font:italic 34px Impact,sans-serif;text-shadow:3px 3px 0 #000}
+.info{padding:12px 14px}
+.info b{font-size:18px}.info span{display:block;font-size:13px;opacity:.85;margin-top:4px}
+.soon{opacity:.55;pointer-events:none}
+footer{text-align:center;font-size:12px;opacity:.75;padding:10px 0 22px}
+</style>
+</head>
+<body>
+<header><h1>JUEGOS NEIRA</h1><p>Elige un juego</p></header>
+<div class="grid">
+  <a class="game" href="carneiradom/">
+    <div class="cover" style="background:linear-gradient(#ffb627,#d9572b)">CARNEIRADOM</div>
+    <div class="info"><b>CarNeiraDom</b><span>Carreras sin reglas: destroza rivales, salta rampas y cuidado con las bombas.</span></div>
+  </a>
+  <a class="game soon" href="#">
+    <div class="cover" style="background:linear-gradient(#2f8cff,#1d2b4f)">SUPER NEIRA BRO</div>
+    <div class="info"><b>Super Neira Bro</b><span>Muy pronto aquí.</span></div>
+  </a>
+</div>
+<footer id="estado">Los juegos se actualizan solos cuando hay internet.</footer>
+<script>
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+if(!navigator.onLine)document.getElementById('estado').textContent='Sin conexión: jugando con la última versión guardada.';
+try{window.NeiraApp&&NeiraApp.setOrientation('any')}catch(e){}
+</script>
+</body>
+</html>
