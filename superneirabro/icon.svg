@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a63d8"/><stop offset="1" stop-color="#8fd2ff"/></linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#sky)"/>
+  <rect y="380" width="512" height="132" fill="#5cc23a"/>
+  <rect y="380" width="512" height="18" fill="#48b52c"/>
+  <!-- tuerca dorada -->
+  <g transform="translate(256 236)">
+    <polygon points="0,-150 130,-75 130,75 0,150 -130,75 -130,-75" fill="#ffc84f" stroke="#b07a10" stroke-width="16" stroke-linejoin="round"/>
+    <circle r="58" fill="#1d2b4f"/>
+    <circle r="58" fill="none" stroke="#b07a10" stroke-width="10"/>
+  </g>
+  <!-- casco de obra -->
+  <g transform="translate(256 120)">
+    <path d="M-96 40 A96 92 0 0 1 96 40 Z" fill="#ff9a1a" stroke="#0d121b" stroke-width="10"/>
+    <rect x="-122" y="34" width="244" height="22" rx="11" fill="#ff9a1a" stroke="#0d121b" stroke-width="10"/>
+    <rect x="-12" y="-46" width="24" height="80" fill="#ffd27a"/>
+  </g>
+</svg>

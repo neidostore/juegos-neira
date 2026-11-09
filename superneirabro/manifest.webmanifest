@@ -1,0 +1,16 @@
+{
+  "name": "Super Neira Bro",
+  "short_name": "Neira Bro",
+  "description": "Plataformas 3D: recoge tuercas y llega al taller.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#1d2b4f",
+  "theme_color": "#2f8cff",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
