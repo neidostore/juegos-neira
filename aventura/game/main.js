@@ -85,7 +85,8 @@ function attack(){if(H.swingCd>0)return;H.swing=H.swingT=HC.ranged?.28:.3;H.swin
   if(HC.ranged){const t=nearestTarget(12,Math.PI*.6)||nearestTarget(7,Math.PI);if(t)H.face=Math.atan2(t.x-H.x,t.z-H.z);H.pend={t:HC.weapon==='ball'?.12:.06,f:()=>shoot(t)};return}
   SFX.swish();const t=nearestTarget(HC.reach+1.2,Math.PI*.65);if(t&&!HC.spin)H.face=Math.atan2(t.x-H.x,t.z-H.z);const fx=Math.sin(H.face),fz=Math.cos(H.face),reach=HC.reach*HC.h;
   H.pend={t:.07,f:()=>{for(const s of mobs){if(s.dead||!s.active)continue;const dx=s.x-H.x,dz=s.z-H.z,d=Math.hypot(dx,dz)-s.r*.6;if(d>reach)continue;if(!HC.spin&&(dx*fx+dz*fz)/Math.max(.01,Math.hypot(dx,dz))<-.15)continue;hitMob(s,dx/Math.max(.01,d+s.r*.6),dz/Math.max(.01,d+s.r*.6),HC.dmg)}
-    for(const c of CHESTS){if(!c.open&&Math.hypot(c.x-H.x,c.z-H.z)<reach+.7)openChest(c)}}}}
+    for(const c of CHESTS){if(!c.open&&Math.hypot(c.x-H.x,c.z-H.z)<reach+.7)openChest(c)}
+    for(const p of POTS){if(!p.dead&&Math.hypot(p.x-H.x,p.z-H.z)<reach+.4)breakPot(p)}}}}
 function shoot(t){const ball=HC.weapon==='ball';(ball?SFX.kick:SFX.shoot).call(SFX);const fx=Math.sin(H.face),fz=Math.cos(H.face);
   const m=ball?new THREE.Mesh(new THREE.SphereGeometry(.22,16,12),S(0xffffff,{map:BALL_T,roughness:.4})):new THREE.Mesh(new THREE.OctahedronGeometry(.18,0),P(0xff4ad8,{emissive:0xff2ad8,emissiveIntensity:2}));m.castShadow=true;
   if(!ball)m.scale.set(.7,.7,2.2);m.position.set(H.x+fx*.7,.7,H.z+fz*.7);sc.add(m);const sp=ball?12:17;
@@ -99,6 +100,7 @@ function stepShots(dt){for(let i=shots.length-1;i>=0;i--){const s=shots[i];s.lif
       if(s.ball){const nx=nearestFrom(s.x,s.z,9,s.hit);s.target=nx;if(!nx){s.vx*=-.6;s.vz*=-.6}else s.vy=3}
       if(s.hits>=s.maxHits)s.life=0;break}}
     for(const c of CHESTS){if(!c.open&&Math.hypot(c.x-s.x,c.z-s.z)<.9){openChest(c);s.life=0}}
+    for(const p of POTS){if(!p.dead&&Math.hypot(p.x-s.x,p.z-s.z)<.7){breakPot(p);s.life=0}}
     if(s.life<=0){sc.remove(s.m);shots.splice(i,1)}}}
 function nearestFrom(x,z,r,skip){let b=null,bd=r;for(const m of mobs){if(m.dead||!m.active||skip.has(m))continue;const d=Math.hypot(m.x-x,m.z-z);if(d<bd){bd=d;b=m}}return b}
 const bombs=[];const BOMB_M=P(0x1a1a28,{roughness:.2});
@@ -110,11 +112,13 @@ function explode(b){sc.remove(b.g);SFX.boom();burst(b.x,.6,b.z,0xffa020,34,4.5,.
   for(const s of mobs){if(!s.dead&&s.active&&Math.hypot(s.x-b.x,s.z-b.z)<2.9+s.r*.5){const d=Math.max(.1,Math.hypot(s.x-b.x,s.z-b.z));hitMob(s,(s.x-b.x)/d,(s.z-b.z)/d,2)}}
   for(const c of CRACKS){if(!c.dead&&Math.hypot(c.x-b.x,c.z-b.z)<3.2){c.dead=true;c.col.dead=true;c.m.visible=false;burst(c.x,1,c.z,0x9a9aa6,34,3.5,.14);puff(c.x,.8,c.z,0xaaaaaa,10,.6);SFX.door();say('¡La roca se ha roto! Hay algo dentro…',2200);saveGame()}}
   if(Math.hypot(H.x-b.x,H.z-b.z)<2.2)hurt(1,H.x-b.x,H.z-b.z)}
+function breakPot(p){p.dead=true;p.col.dead=true;p.m.visible=false;SFX.noise(.25,.14,2500);SFX.tone(500,.1,'square',.04,200);burst(p.x,.5,p.z,0xc8784a,16,2.5,.1);
+  const r=Math.random();if(r<.35)dropHeart(p.x,p.z);else if(r<.85)dropGem(p.x,p.z,Math.floor(R(1,4)))}
 function openChest(c){if(c.open)return;c.open=true;SFX.chest();c.glow.material.opacity=.9;c.spark.visible=false;burst(c.x,1.1,c.z,0xffd84a,20,2.2);
   if(c.gift==='big'){say('¡TESORO SECRETO! +20 diamantes y un corazón',2400);dropGem(c.x,c.z,20);dropHeart(c.x,c.z)}else{say('¡Cofre! +8 diamantes',1800);dropGem(c.x,c.z,8)}saveGame()}
 
 /* ---------- jefes ---------- */
-function startBoss(b){GAME.boss=b;$('bossName').textContent=b.boss.name;$('bossbar').style.display='block';updBoss();Music.play('jefe');banner('¡JEFE!',b.boss.name,2200);SFX.door()}
+function startBoss(b){GAME.boss=b;GAME.cine=1.8;b.st=Math.max(b.st,2.2);$('bossName').textContent=b.boss.name;$('bossbar').style.display='block';updBoss();Music.play('jefe');banner('¡JEFE!',b.boss.name,2200);SFX.door()}
 function updBoss(){const b=GAME.boss;if(!b)return;$('bossHp').style.width=Math.max(0,b.hp/b.max*100)+'%'}
 function onBossDefeated(b){const r=REGIONS[b.region];r.beaten=true;GAME.boss=null;$('bossbar').style.display='none';if(b.mark)b.mark.visible=false;
   hazards.forEach(h=>sc.remove(h.m));hazards.length=0;shake=.8;SFX.boom();for(let i=0;i<4;i++)setTimeout(()=>burst(b.x+R(-2,2),R(1,3),b.z+R(-2,2),pick([0xffd84a,0xff5a8a,0x5ad8ff]),24,4),i*220);
@@ -151,6 +155,7 @@ const tmpV=new THREE.Vector3();let last=performance.now(),stepT=0,cpT=0;
 function step(dt){TIME+=dt;windU.value=TIME;ANIM.forEach(f=>f(dt));stepParts(dt);
   if(GAME.state!=='play'){stepTitle(dt);return}
   if(GAME.dead){updateCam(dt);return}
+  if(GAME.cine>0){GAME.cine-=dt;hero.position.set(H.x,0,H.z);animChar(hero,{time:TIME,moving:false,shield:false,swing:0,swingT:.3});const b=GAME.boss;if(b){b.t+=dt;b.g.position.set(b.x,b.y||0,b.z);b.g.rotation.y+=angDiff(Math.atan2(H.x-b.x,H.z-b.z),b.g.rotation.y)*dt*4;b.body.position.y=Math.abs(Math.sin(TIME*6))*.15}updateCam(dt);drawMini();return}
   // movimiento
   let mx=joyX,mz=joyY;if(keys.arrowleft||keys.a)mx=-1;if(keys.arrowright||keys.d)mx=1;if(keys.arrowup||keys.w)mz=-1;if(keys.arrowdown||keys.s)mz=1;
   const ml=Math.min(1,Math.hypot(mx,mz));H.shield=!!keys.shield;const spd=HC.spd*(H.shield?.45:1)*(H.swing>0&&!HC.ranged?.55:1);H.moving=ml>.15;
@@ -160,9 +165,10 @@ function step(dt){TIME+=dt;windU.value=TIME;ANIM.forEach(f=>f(dt));stepParts(dt)
   if(H.pend){H.pend.t-=dt;if(H.pend.t<=0){const f=H.pend.f;H.pend=null;f()}}
   H.swing=Math.max(0,H.swing-dt);H.swingCd=Math.max(0,H.swingCd-dt);H.inv=Math.max(0,H.inv-dt);H.bombCd=Math.max(0,H.bombCd-dt);$('bBomb').classList.toggle('cd',H.bombCd>0);
   hero.position.set(H.x,0,H.z);hero.rotation.y+=angDiff(H.face,hero.rotation.y)*Math.min(1,dt*16);animChar(hero,{time:TIME,moving:H.moving,shield:H.shield,swing:H.swing,swingT:H.swingT});
-  hero.visible=H.inv<=0||Math.floor(H.inv*14)%2===0;ghost.visible=hero.visible;syncGhost();
-  // región
-  const reg=regionAt(H.z);if(reg!==GAME.reg)enterRegion(reg);if(LT)applyLight(LT,1-Math.pow(.25,dt));
+  hero.visible=H.inv<=0||Math.floor(H.inv*14)%2===0;ghost.visible=hero.visible&&occluded();if(ghost.visible)syncGhost();
+  // región (y solo se dibujan las regiones cercanas)
+  const reg=regionAt(H.z);if(reg!==GAME.reg)enterRegion(reg);
+  REG_GROUPS.forEach((g,k)=>{const [z0,z1]=regZ(k);const d=H.z>z0?H.z-z0:H.z<z1?z1-H.z:0;g.visible=d<52});if(LT)applyLight(LT,1-Math.pow(.25,dt));
   // cristales de guardado
   cpT-=dt;for(const c of CHECKPOINTS){if(Math.hypot(c.x-H.x,c.z-H.z)<1.8&&cpT<=0){cpT=6;if(H.cp!==c.reg||H.hp<H.max){H.cp=c.reg;H.hp=H.max;hud();SFX.heart();burst(c.x,1.5,c.z,0x6ae8ff,24,2);saveGame();say('Partida guardada · corazones llenos',2000)}}}
   // carteles
@@ -178,11 +184,16 @@ function step(dt){TIME+=dt;windU.value=TIME;ANIM.forEach(f=>f(dt));stepParts(dt)
   FLAMES.forEach((f,i)=>{f.scale.set(1,1+Math.sin(TIME*14+i)*.2,1)});
   stepAmb(dt);hurtFlash=Math.max(0,hurtFlash-dt*2.5);if(finalPass)finalPass.uniforms.hurt.value=hurtFlash*.5;
   updateCam(dt);drawMini()}
+/* ¿hay algo entre la cámara y el héroe? (árboles, casas, rocas grandes) */
+function occluded(){const cx=cam.position.x,cz=cam.position.z,hx=H.x,hz=H.z;const dx=hx-cx,dz=hz-cz,L2=dx*dx+dz*dz;let hit=false;
+  eachCol(H.z,c=>{if(hit)return;if(c.box){const [x0,x1,z0,z1]=c.box;if(z1-z0>10||x1-x0>14)return;const mx=(x0+x1)/2,mz=(z0+z1)/2,r=Math.max(x1-x0,z1-z0)/2;const t=clamp(((mx-cx)*dx+(mz-cz)*dz)/L2,0,1);if(t>.2&&Math.hypot(cx+dx*t-mx,cz+dz*t-mz)<r)hit=true;return}
+    if(c.r<.5)return;const t=clamp(((c.x-cx)*dx+(c.z-cz)*dz)/L2,0,1);if(t<.25||t>.97)return;if(Math.hypot(cx+dx*t-c.x,cz+dz*t-c.z)<c.r*2.4)hit=true});return hit}
 function syncGhost(){ghost.position.copy(hero.position);ghost.rotation.copy(hero.rotation);ghost.scale.copy(hero.scale);
   const a=[],b=[];hero.traverse(o=>a.push(o));ghost.traverse(o=>b.push(o));for(let i=1;i<a.length&&i<b.length;i++){b[i].position.copy(a[i].position);b[i].rotation.copy(a[i].rotation);b[i].scale.copy(a[i].scale);b[i].visible=a[i].visible}}
 const camT={x:0,z:0,h:10.8,d:8.6};
 function updateCam(dt){shake=Math.max(0,shake-dt*1.6);const b=GAME.boss;let tx=H.x,tz=H.z,h=10.8,dd=8.6;
-  if(b&&!b.dead){const k=.42;tx=lerp(H.x,b.x,k);tz=lerp(H.z,b.z,k);const sep=Math.hypot(b.x-H.x,b.z-H.z);h=clamp(11+sep*.35,11,16);dd=h*.8}
+  if(b&&!b.dead&&GAME.cine>0){tx=b.x;tz=b.z+1;h=9.5;dd=8.5}
+  else if(b&&!b.dead){const k=.42;tx=lerp(H.x,b.x,k);tz=lerp(H.z,b.z,k);const sep=Math.hypot(b.x-H.x,b.z-H.z);h=clamp(11+sep*.35,11,16);dd=h*.8}
   const kk=1-Math.exp(-4*dt);camT.x=lerp(camT.x,tx,kk);camT.z=lerp(camT.z,tz,kk);camT.h=lerp(camT.h,h,kk*.6);camT.d=lerp(camT.d,dd,kk*.6);
   tmpV.set(camT.x,camT.h,camT.z+camT.d);cam.position.lerp(tmpV,1-Math.exp(-7*dt));
   if(shake>0){cam.position.x+=R(-1,1)*shake*.35;cam.position.y+=R(-1,1)*shake*.35}cam.lookAt(cam.position.x,.3,cam.position.z-camT.d+.5);

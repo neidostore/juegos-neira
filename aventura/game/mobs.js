@@ -8,9 +8,9 @@ function brows(g,y,z,sp,s,angry){[-1,1].forEach(sd=>{const b=mk(new THREE.BoxGeo
 function crown(g,y,s){const cm=PM(0xffc84f,{metalness:1,roughness:.2,emissive:0x6a4400,emissiveIntensity:.4});const c=new THREE.Group();mk(new THREE.CylinderGeometry(.3*s,.32*s,.18*s,12,1,true),cm,0,0,0,c);
   for(let i=0;i<6;i++){const a=i/6*Math.PI*2;mk(new THREE.ConeGeometry(.07*s,.2*s,5),cm,Math.cos(a)*.3*s,.17*s,Math.sin(a)*.3*s,c)}mk(new THREE.OctahedronGeometry(.07*s,0),PM(0xff3a5a,{emissive:0xaa0020,emissiveIntensity:1}),0,.02*s,.32*s,c);c.position.y=y;g.add(c);return c}
 const MOB={
-  slime:{hp:2,r:.5,ai:'hop',spd:1.7,col:0xff4a4a,make(m,col){const mat=new THREE.MeshPhysicalMaterial({color:col,roughness:.06,clearcoat:1,transparent:true,opacity:.86,emissive:col,emissiveIntensity:.2});m.mats=[mat];
+  slime:{hp:2,r:.5,ai:'hop',spd:1.7,col:0xff4a4a,make(m,col){const mat=new THREE.MeshPhysicalMaterial({color:LIN(col),roughness:.06,clearcoat:1,transparent:true,opacity:.86,emissive:col,emissiveIntensity:.2});m.mats=[mat];
     const b=m.body;const o=outline(mk(new THREE.SphereGeometry(.55,26,16),mat,0,.42,0,b),1.05);o.scale.set(1,.78,1);
-    mk(new THREE.SphereGeometry(.28,14,10),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:.6,transparent:true,opacity:.6}),0,.38,0,b,false);
+    mk(new THREE.SphereGeometry(.28,14,10),new THREE.MeshStandardMaterial({color:LIN(col),emissive:col,emissiveIntensity:.6,transparent:true,opacity:.6}),0,.38,0,b,false);
     outline(mk(new THREE.ConeGeometry(.2,.32,14),mat,0,.86,0,b));eyes(b,.55,.42,.18,1);
     const mo=mk(new THREE.TorusGeometry(.07,.02,6,12,Math.PI),SM(0x1a1018),0,.4,.5,b,false);mo.rotation.z=Math.PI;
     mk(new THREE.SphereGeometry(.09,8,6),SM(0xffffff,{emissive:0xffffff,emissiveIntensity:.8}),-.24,.74,.26,b,false);blobShadow(m.g,.7)}},
@@ -24,7 +24,7 @@ const MOB={
     mk(new THREE.BoxGeometry(.03,.42,1.3),dk,0,.5,-.1,b,false);const hd=outline(mk(new THREE.SphereGeometry(.3,18,14),dk,0,.32,.55,b));
     const horn=outline(mk(new THREE.ConeGeometry(.08,.45,10),PM(0xffc84f,{metalness:.8,roughness:.2}),0,.52,.82,b));horn.rotation.x=1.1;eyes(b,.42,.78,.13,.7,0xff3a2a);
     m.legs=[];for(let i=0;i<3;i++)[-1,1].forEach(sd=>{const l=mk(new THREE.CylinderGeometry(.035,.025,.42,6),dk,.48*sd,.14,.3-i*.38,b,false);l.rotation.z=.9*sd;m.legs.push(l)});blobShadow(m.g,.85)}},
-  murcielago:{hp:1,r:.45,ai:'fly',spd:3.4,col:0x5a2a8a,make(m,col){const fur=S(col,{roughness:.7}),wing=new THREE.MeshStandardMaterial({color:new THREE.Color(col).multiplyScalar(.6),roughness:.8,side:THREE.DoubleSide});m.mats=[fur];const b=m.body;
+  murcielago:{hp:1,r:.45,ai:'fly',spd:3.4,col:0x5a2a8a,make(m,col){const fur=S(col,{roughness:.7}),wing=new THREE.MeshStandardMaterial({color:LIN(new THREE.Color(col).multiplyScalar(.6)),roughness:.8,side:THREE.DoubleSide});m.mats=[fur];const b=m.body;
     outline(mk(new THREE.SphereGeometry(.32,20,14),fur,0,0,0,b));
     [-1,1].forEach(sd=>{const e=outline(mk(new THREE.ConeGeometry(.11,.3,8),fur,.16*sd,.3,0,b));e.rotation.z=-.3*sd;mk(new THREE.ConeGeometry(.06,.18,8),SM(0xff9ad0),.16*sd,.3,.04,b,false).rotation.z=-.3*sd});
     eyes(b,.07,.24,.12,.75,0xffd84a);[-1,1].forEach(sd=>mk(new THREE.ConeGeometry(.025,.08,6),SM(0xffffff),.05*sd,-.1,.29,b,false).rotation.x=Math.PI);
@@ -60,7 +60,7 @@ const MOB={
     const bkk=mk(new THREE.ConeGeometry(.08,.22,8),or,0,.85,.42,b);bkk.rotation.x=Math.PI/2;eyes(b,.98,.34,.13,.75);
     [-1,1].forEach(sd=>{const f=mk(new THREE.BoxGeometry(.2,.06,.26),or,.15*sd,.04,.1,b);const w=outline(mk(new THREE.SphereGeometry(.16,10,8),bk,.42*sd,.6,0,b));w.scale.set(.3,1.1,.7);w.rotation.z=.3*sd});
     const sc2=mk(new THREE.TorusGeometry(.3,.07,8,18),SM(0xe8302a),0,.95,0,b);sc2.rotation.x=Math.PI/2;blobShadow(m.g,.75)}},
-  armadura:{hp:5,r:.6,ai:'walk',spd:1.6,dmg:2,col:0x9aa2ae,make(m,col){const ar=new THREE.MeshStandardMaterial({color:col,roughness:.25,metalness:.85}),dk=SM(0x1a1a22),rd=SM(0xd8202a,{roughness:.6});m.mats=[ar];const b=m.body;
+  armadura:{hp:5,r:.6,ai:'walk',spd:1.6,dmg:2,col:0x9aa2ae,make(m,col){const ar=new THREE.MeshStandardMaterial({color:LIN(col),roughness:.25,metalness:.85}),dk=SM(0x1a1a22),rd=SM(0xd8202a,{roughness:.6});m.mats=[ar];const b=m.body;
     const bd=outline(mk(new THREE.CylinderGeometry(.38,.32,.8,14),ar,0,.95,0,b));const hm=outline(mk(new THREE.SphereGeometry(.32,18,14),ar,0,1.62,0,b));
     mk(new THREE.BoxGeometry(.4,.06,.06),dk,0,1.6,.3,b,false);mk(new THREE.BoxGeometry(.06,.25,.06),dk,0,1.5,.3,b,false);const pl=mk(new THREE.SphereGeometry(.12,10,8),rd,0,1.95,-.05,b);pl.scale.set(.5,1.4,1.4);
     const eg=mk(new THREE.BoxGeometry(.3,.03,.03),SM(0xff3a2a,{emissive:0xff2a1a,emissiveIntensity:2}),0,1.6,.32,b,false);
@@ -83,7 +83,7 @@ function makeMob(kind,x,z,o={}){const t=MOB[kind];const col=o.col||t.col;
 /* proyectiles enemigos */
 const HZ_G={bolt:new THREE.OctahedronGeometry(.18,0),ball:new THREE.SphereGeometry(.25,14,10),big:new THREE.SphereGeometry(.5,16,12),spike:new THREE.ConeGeometry(.08,.4,6)};
 const HZ_M={fire:PM(0xff7a1a,{emissive:0xff4a00,emissiveIntensity:2.5}),snow:PM(0xffffff,{emissive:0x8ab8ff,emissiveIntensity:.3}),ink:PM(0x8a3aff,{emissive:0x6a2ad8,emissiveIntensity:1.6}),
-  spike:SM(0xfff4c0),bubble:new THREE.MeshPhysicalMaterial({color:0xbfe8ff,roughness:0,clearcoat:1,transparent:true,opacity:.6,emissive:0x3a8aff,emissiveIntensity:.4}),sting:PM(0x8aff4a,{emissive:0x4aa82a,emissiveIntensity:1.5})};
+  spike:SM(0xfff4c0),bubble:new THREE.MeshPhysicalMaterial({color:LIN(0xbfe8ff),roughness:0,clearcoat:1,transparent:true,opacity:.6,emissive:0x3a8aff,emissiveIntensity:.4}),sting:PM(0x8aff4a,{emissive:0x4aa82a,emissiveIntensity:1.5})};
 function spawnHazard(kind,x,y,z,vx,vy,vz,o={}){const geo=o.geo||'bolt';const m=new THREE.Mesh(HZ_G[geo],HZ_M[kind]);m.castShadow=true;m.position.set(x,y,z);m.scale.setScalar(o.scale||1);sc.add(m);
   hazards.push({m,kind,x,y,z,vx,vy,vz,g:o.g||0,r:(o.r||.35)*(o.scale||1),dmg:o.dmg||1,life:o.life||3,splash:o.splash||0,geo})}
 function updateHazards(dt){for(let i=hazards.length-1;i>=0;i--){const h=hazards[i];h.life-=dt;h.vy-=h.g*dt;h.x+=h.vx*dt;h.y+=h.vy*dt;h.z+=h.vz*dt;

@@ -16,10 +16,10 @@ function blocked(x,z,r){let b=false;eachCol(z,c=>{if(b)return;if(c.box){const [x
 
 /* ---------- elementos reutilizables ---------- */
 const leafPal={bosque:[[0x4ac03a,0x12541c],[0x5ad04a,0x1a6a22],[0x3aae34,0x0e4a18],[0x7ac83a,0x2a6a14]],otono:[[0xffa82a,0x8a3a0a],[0xff7a2a,0x7a2a0a],[0xffd04a,0x8a5a0a]]};
-const TREES=[];const PALM_M=new THREE.MeshStandardMaterial({color:0x3aa83a,roughness:.7,side:THREE.DoubleSide});const LEAF_M=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.8,envMapIntensity:.5});const BUSH_M=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.75,envMapIntensity:.5});
+const TREES=[];const PALM_M=new THREE.MeshStandardMaterial({color:LIN(0x3aa83a),roughness:.7,side:THREE.DoubleSide});const LEAF_M=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.8,envMapIntensity:.5});const BUSH_M=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.75,envMapIntensity:.5});
 function tree(g,reg,x,z,s,pal){const t=new THREE.Group();const trunk=SM(0x8a5a2e,{roughness:.9});mk(bumpy(new THREE.CylinderGeometry(.22*s,.38*s,2*s,10,4),.06),trunk,0,s,0,t);
   const [top,bot]=pickS(pal||leafPal.bosque);const lm=LEAF_M;
-  [[0,2.5,0,1.35],[.85,2.1,.35,1],[-.75,2.15,-.2,1.05],[.1,3.3,.1,.95],[-.35,2.7,.75,.85],[.5,2.8,-.6,.8]].forEach(([a,b,c,r])=>mk(shade(bumpy(new THREE.SphereGeometry(r*s,12,9),.08),top,bot),lm,a*s,b*s,c*s,t));
+  [[0,2.5,0,1.35],[.85,2.1,.35,1],[-.75,2.15,-.2,1.05],[.1,3.3,.1,.95],[-.35,2.7,.75,.85],[.5,2.8,-.6,.8]].forEach(([a,b,c,r])=>mk(shade(bumpy(new THREE.SphereGeometry(r*s,10,7),.08),top,bot),lm,a*s,b*s,c*s,t));
   t.position.set(x,0,z);t.rotation.y=RS(0,6);g.add(t);addCol(reg,x,z,.55*s);return t}
 function pine(g,reg,x,z,s,snow){const t=new THREE.Group();mk(new THREE.CylinderGeometry(.18*s,.28*s,1.2*s,8),SM(0x6a4424),0,.6*s,0,t);
   const lm=SM(snow?0x2a6a4a:0x2a7a3a,{roughness:.8}),sm=SM(0xf4f8ff,{roughness:.6});
@@ -49,6 +49,12 @@ const T_stone=cv(256,256,(g,w,h)=>{g.fillStyle='#4a4450';g.fillRect(0,0,w,h);for
 /* señales con texto */
 const SIGNS=[];function signPost(g,reg,x,z,lines){const s=new THREE.Group();mk(new THREE.CylinderGeometry(.08,.08,1.4,8),SM(0x7a4a24),0,.7,0,s);mk(new THREE.BoxGeometry(1.3,.8,.1),SM(0xffffff,{map:T_wood}),0,1.35,0,s);
   for(let i=0;i<3;i++)mk(new THREE.BoxGeometry(.9,.05,.02),SM(0x3a2010),0,1.55-i*.18,.06,s,false);s.position.set(x,0,z);g.add(s);addCol(reg,x,z,.35);SIGNS.push({x,z,lines})}
+/* tinajas que se rompen */
+const POTS=[];const potG=new THREE.LatheGeometry([[0,0],[.3,0],[.42,.18],[.45,.4],[.38,.62],[.24,.74],[.26,.84],[.2,.86]].map(([x,y])=>new THREE.Vector2(x,y)),16);
+function pots(g,reg,n,avoid){const pm=[SM(0xc8784a,{roughness:.7}),SM(0x8a5a3a,{roughness:.7}),SM(0x5a8ac8,{roughness:.5})];const [z0,z1]=regZ(reg);let k=0;
+  for(let i=0;i<n*8&&k<n;i++){const x=RS(-RW+4,RW-4),z=z0-RS(8,RD-14);if(avoid&&avoid(x,z))continue;if(blocked(x,z,1))continue;
+    const cl=RS(0,1)<.5?3:1;for(let q=0;q<cl;q++){const px=x+(q?RS(-1,1):0),pz=z+(q?RS(-1,1):0);const m=new THREE.Mesh(potG,pickS(pm));m.position.set(px,0,pz);m.scale.setScalar(RS(.9,1.15));m.castShadow=m.receiveShadow=true;m.userData.keep=true;g.add(m);
+      const band=new THREE.Mesh(new THREE.TorusGeometry(.43,.035,6,18),SM(0xf2e6cc));band.rotation.x=Math.PI/2;band.position.y=.42;m.add(band);POTS.push({m,x:px,z:pz,reg,col:addCol(reg,px,pz,.42)})}k++}}
 /* personajes que hablan */
 const NPCS=[];function npc(g,reg,x,z,cfg,lines,ry=0){const m=makeChar(Object.assign({id:'npc',h:1,shoes:0x3a2412,pants:0x3a3a4a,weapon:'none',noShield:true,reach:1},cfg));m.position.set(x,0,z);m.rotation.y=ry;sc.add(m);
   NPCS.push({m,x,z,ry,reg});addCol(reg,x,z,.5);SIGNS.push({x,z,lines,who:cfg.name,r:3.2})}
@@ -88,10 +94,10 @@ function flowers(g,n,x0,x1,z0,z1,avoid,cols){const fm=new THREE.InstancedMesh(ne
   for(let i=0;i<n*2&&k<n;i++){const x=RS(x0,x1),z=RS(z0,z1);if(avoid&&avoid(x,z))continue;dm.position.set(x,.16,z);dm.updateMatrix();fm.setMatrixAt(k,dm.matrix);fm.setColorAt(k,new THREE.Color(pickS(cols)));k++}fm.count=k;g.add(fm)}
 function ground(g,reg,tex,rep){const [z0,z1]=regZ(reg);const p=mk(new THREE.PlaneGeometry(RW*2+30,RD+.5),SM(0xffffff,{map:tex,roughness:.95}),0,0,(z0+z1)/2,g,false);p.rotation.x=-Math.PI/2;tex.repeat.set((RW*2+30)/rep,RD/rep);p.userData.keep=true;return p}
 function water(g,x,z,w,d,col,em){const T_w=cvLin(256,256,(gg)=>{gg.fillStyle='rgb(128,128,255)';gg.fillRect(0,0,256,256);for(let i=0;i<160;i++){const x2=R(0,256),y=R(0,256),r=R(8,26);const gr=gg.createRadialGradient(x2,y,0,x2,y,r);gr.addColorStop(0,`rgb(${R(100,160)},${R(100,160)},255)`);gr.addColorStop(1,'rgba(128,128,255,0)');gg.fillStyle=gr;gg.fillRect(x2-r,y-r,2*r,2*r)}});
-  T_w.repeat.set(w/6,d/6);const m=new THREE.MeshPhysicalMaterial({color:col,roughness:.06,metalness:.1,clearcoat:1,normalMap:T_w,normalScale:new THREE.Vector2(.6,.6),transparent:true,opacity:.9,emissive:em||0x0a3a8a,emissiveIntensity:.25});
+  T_w.repeat.set(w/6,d/6);const m=new THREE.MeshPhysicalMaterial({color:LIN(col),roughness:.06,metalness:.1,clearcoat:1,normalMap:T_w,normalScale:new THREE.Vector2(.6,.6),transparent:true,opacity:.9,emissive:em||0x0a3a8a,emissiveIntensity:.25});
   const p=mk(new THREE.PlaneGeometry(w,d),m,x,.06,z,g,false);p.rotation.x=-Math.PI/2;p.userData.keep=true;ANIM.push(dt=>{T_w.offset.y-=dt*.08;T_w.offset.x+=dt*.02});return p}
 function lavaPlane(g,x,z,w,d){const T_l=cv(256,256,(gg)=>{gg.fillStyle='#ff5a14';gg.fillRect(0,0,256,256);for(let i=0;i<70;i++){gg.fillStyle=pick(['#ffb020','#ff7a1a','#c8280e','#ffd84a','#8a1a08']);gg.beginPath();gg.ellipse(R(0,256),R(0,256),R(8,30),R(4,12),R(0,3),0,7);gg.fill()}});
-  T_l.repeat.set(w/8,d/8);const m=new THREE.MeshStandardMaterial({map:T_l,emissive:0xff4a10,emissiveMap:T_l,emissiveIntensity:1.6,roughness:.7});const p=mk(new THREE.PlaneGeometry(w,d),m,x,.08,z,g,false);p.rotation.x=-Math.PI/2;p.userData.keep=true;
+  T_l.repeat.set(w/8,d/8);const m=new THREE.MeshStandardMaterial({map:T_l,emissive:LIN(0xff4a10),emissiveMap:T_l,emissiveIntensity:1.6,roughness:.7});const p=mk(new THREE.PlaneGeometry(w,d),m,x,.08,z,g,false);p.rotation.x=-Math.PI/2;p.userData.keep=true;
   ANIM.push(dt=>{T_l.offset.y-=dt*.05;T_l.offset.x+=Math.sin(TIME*.3)*dt*.02});return p}
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 const ANIM=[];
@@ -156,6 +162,7 @@ const BUILD={
   wallRow(g,reg,z1,(x,z)=>{if(RS(0,1)<.5)tree(g,reg,x,z,RS(1.2,1.5));else rock(g,reg,x,z,RS(1.2,1.6),0x8a8a96,0x4f9a34,false)});gate(g,reg,z1,{pillar:SM(0x9a9aa6,{roughness:.85}),door:SM(0xffffff,{map:T_wood,roughness:.7})});
   sideWalls(g,reg,(x,z)=>{if(RS(0,1)<.6)tree(g,reg,x,z,RS(1.3,1.7));else rock(g,reg,x,z,RS(1.4,2),0x8a8a96,0x4f9a34,false)});
   for(let x=-RW;x<=RW;x+=2.6)tree(g,reg,x,z0+1.5,RS(1.3,1.7));addBox(reg,-RW-2,RW+2,z0,z0+3);
+  pots(g,reg,7,(x,z)=>riverAvoid(x,z)||Math.abs(x)<3||z>z0-24);
   placeMobs(reg,[['slime',5,{col:0xff4a4a}],['slime',3,{col:0x4aff6a}],['seta',4],['escarabajo',2],['murcielago',3]],(x,z)=>z>z0-26||Math.hypot(x,z-(z0-60))<12);placeBoss(reg)},
  playa(g,reg){const [z0,z1]=regZ(reg);ground(g,reg,groundTex('#ecd49a',7000,[38,48,45,66,84],(gg,w,h)=>{for(let i=0;i<60;i++){gg.fillStyle=pick(['#ff9ab0','#ffffff','#ffb060']);gg.beginPath();gg.ellipse(R(0,w),R(0,h),3,2,R(0,3),0,7);gg.fill()}}),10);
   const SX=19;water(g,SX+18,(z0+z1)/2,36,RD+2,0x1a9ae8,0x0a5a9a);addBox(reg,SX,RW+4,z1,z0);
@@ -177,10 +184,11 @@ const BUILD={
   for(let i=0;i<6;i++)rock(g,reg,RS(-12,8),z0-RS(52,66),RS(1.2,1.8),0xa8a090,0);
   wallRow(g,reg,z1,(x,z)=>rock(g,reg,x,z,RS(1.4,1.9),0xb8a880,0,false));gate(g,reg,z1,{pillar:SM(0xe8d8b0,{roughness:.85}),door:SM(0xffffff,{map:T_wood,roughness:.7})});
   sideWalls(g,reg,(x,z)=>{if(x<0){if(RS(0,1)<.5)palm(g,reg,x,z,RS(1.1,1.5));else rock(g,reg,x,z,RS(1.4,2),0xb8a880,0,false)}});
+  pots(g,reg,6,avoid);
   placeMobs(reg,[['cangrejo',6],['slime',3,{col:0x3ab0ff}],['murcielago',2,{col:0xe8f0ff}],['escarabajo',2,{col:0x2aa8a8}]],avoid);placeBoss(reg)},
- desierto(g,reg){const [z0,z1]=regZ(reg);ground(g,reg,groundTex('#e8b868',8000,[30,42,55,58,76]),10);
+ desierto(g,reg){const [z0,z1]=regZ(reg);const sandT=groundTex('#e8b868',8000,[30,42,55,58,76]);ground(g,reg,sandT,10);const duneM=SM(0xffffff,{map:sandT,roughness:1});
   const avoid=(x,z)=>Math.abs(x)<3||Math.hypot(x,z-(z0-60))<10||z>z0-6;
-  for(let i=0;i<16;i++){const x=RS(-RW,RW),z=RS(z1,z0);const d=mk(new THREE.SphereGeometry(RS(3,7),20,10,0,Math.PI*2,0,Math.PI/2),SM(0xe8b868,{roughness:1}),x,-.2,z,g,false);d.scale.y=RS(.12,.25)}
+  for(let i=0;i<16;i++){const x=RS(-RW,RW),z=RS(z1,z0);const d=mk(new THREE.SphereGeometry(RS(3,7),20,10,0,Math.PI*2,0,Math.PI/2),duneM,x,-.25,z,g,false);d.scale.y=RS(.08,.16)}
   // oasis
   water(g,-18,z0-30,9,7,0x2ab8c8,0x0a6a6a);addCol(reg,-18,z0-30,3.6);[[-23,-27],[-13,-34],[-21,-35]].forEach(([x,z])=>palm(g,reg,x,z0+z+0,1.2));
   for(let i=0;i<4;i++){const x=RS(-RW+6,RW-6),z=RS(z1+12,z0-14);if(avoid(x,z)||Math.hypot(x+18,z-(z0-30))<8)continue;const h=RS(4,8),w=RS(2.5,4.5);const ms=new THREE.Group();
@@ -199,10 +207,11 @@ const BUILD={
   for(let i=0;i<5;i++)rock(g,reg,RS(-10,10),z0-RS(50,66),RS(1.2,1.8),0xc8885a,0);
   wallRow(g,reg,z1,(x,z)=>rock(g,reg,x,z,RS(1.5,2),0xb8784a,0,false));gate(g,reg,z1,{pillar:SM(0xc8885a,{roughness:.85}),door:SM(0x8a8a96,{metalness:.6,roughness:.4})});
   sideWalls(g,reg,(x,z)=>rock(g,reg,x,z,RS(1.6,2.2),0xb8784a,0,false));
+  pots(g,reg,6,avoid);
   placeMobs(reg,[['escorpion',4],['cactus',5],['murcielago',2,{col:0x8a5a2a}],['slime',3,{col:0xffa02a}]],avoid);placeBoss(reg)},
  nieve(g,reg){const [z0,z1]=regZ(reg);ground(g,reg,groundTex('#eaf0f8',1800,[205,215,25,86,95]),12);
   const avoid=(x,z)=>Math.abs(x)<3||Math.hypot(x,z-(z0-60))<10||z>z0-6||Math.hypot(x-16,z-(z0-30))<8;
-  const ice=mk(new THREE.CircleGeometry(7.5,40),new THREE.MeshPhysicalMaterial({color:0xbfe8ff,roughness:.05,clearcoat:1,transparent:true,opacity:.85,emissive:0x3a7aaa,emissiveIntensity:.15}),16,.05,z0-30,g,false);ice.rotation.x=-Math.PI/2;ice.userData.keep=true;
+  const ice=mk(new THREE.CircleGeometry(7.5,40),new THREE.MeshPhysicalMaterial({color:LIN(0x7ac4ee),roughness:.04,clearcoat:1,transparent:true,opacity:.92,emissive:LIN(0x1a5a8a),emissiveIntensity:.25}),16,.05,z0-30,g,false);ice.rotation.x=-Math.PI/2;ice.userData.keep=true;
   for(let i=0;i<14;i++){const a=i/14*Math.PI*2;rock(g,reg,16+Math.cos(a)*8,z0-30+Math.sin(a)*8,RS(.4,.7),0xd8e4f0,0,false)}
   for(let i=0;i<55;i++){const x=RS(-RW+2,RW-2),z=RS(z1+4,z0-4);if(avoid(x,z))continue;const k=RS(0,1);
     if(k<.55)pine(g,reg,x,z,RS(.9,1.4),true);else if(k<.68){const sm=new THREE.Group();const w=SM(0xffffff,{roughness:.6});mk(new THREE.SphereGeometry(.6,16,12),w,0,.55,0,sm);mk(new THREE.SphereGeometry(.42,16,12),w,0,1.4,0,sm);mk(new THREE.SphereGeometry(.3,14,10),w,0,2.02,0,sm);
@@ -218,6 +227,7 @@ const BUILD={
   for(let i=0;i<5;i++)rock(g,reg,RS(-10,10),z0-RS(50,66),RS(1.2,1.8),0xb8c8d8,0xf4f8ff);
   wallRow(g,reg,z1,(x,z)=>{if(RS(0,1)<.5)pine(g,reg,x,z,RS(1.3,1.7),true);else rock(g,reg,x,z,RS(1.4,2),0xb8c8d8,0xf4f8ff,false)});gate(g,reg,z1,{pillar:SM(0xd8e4f0,{roughness:.6}),door:PM(0x8ad8ff,{emissive:0x2a6aa8,emissiveIntensity:.3,roughness:.1})});
   sideWalls(g,reg,(x,z)=>{if(RS(0,1)<.5)pine(g,reg,x,z,RS(1.4,1.8),true);else rock(g,reg,x,z,RS(1.4,2),0xb8c8d8,0xf4f8ff,false)});
+  pots(g,reg,6,avoid);
   placeMobs(reg,[['pinguino',5],['golem',2,{col:0x8ac8e8,top:0xf4f8ff,eye:0x2a6aff}],['slime',3,{col:0xbfe8ff}],['murcielago',2,{col:0x4a6a9a}]],avoid);placeBoss(reg)},
  volcan(g,reg){const [z0,z1]=regZ(reg);ground(g,reg,groundTex('#3a2a2a',6000,[0,20,12,12,26],(gg,w,h)=>{for(let i=0;i<30;i++){gg.strokeStyle='rgba(255,90,20,.35)';gg.lineWidth=R(1,3);gg.beginPath();let x=R(0,w),y=R(0,h);gg.moveTo(x,y);for(let k=0;k<5;k++){x+=R(-20,20);y+=R(-20,20);gg.lineTo(x,y)}gg.stroke()}}),10);
   const avoid=(x,z)=>Math.abs(x)<3||Math.hypot(x,z-(z0-60))<10||z>z0-6||Math.abs(z-(z0-22))<4||Math.abs(z-(z0-42))<4;
@@ -234,6 +244,7 @@ const BUILD={
   checkpoint(g,reg,2,z0-6);secret(g,reg,41,-24,z0-32,Math.PI/2,0x2a2024,0);chest(g,reg,42,24,z0-52,-.5,'gems');
   wallRow(g,reg,z1,(x,z)=>rock(g,reg,x,z,RS(1.5,2),0x2a2024,0,false));gate(g,reg,z1,{pillar:SM(0x2a2024,{roughness:.85}),door:SM(0x5a1a10,{metalness:.6,roughness:.4,emissive:0x5a1000,emissiveIntensity:.4})});
   sideWalls(g,reg,(x,z)=>rock(g,reg,x,z,RS(1.6,2.2),0x2a2024,0,false));
+  pots(g,reg,6,avoid);
   placeMobs(reg,[['slime',4,{col:0xff6a1a}],['golem',2,{col:0x3a2a2a,glow:0xff5a10,eye:0xffd04a,top:0x1a1010}],['murcielago',3,{col:0xc82a1a}],['escorpion',2,{col:0x8a2a1a}]],avoid);placeBoss(reg)},
  castillo(g,reg){const [z0,z1]=regZ(reg);const T_tiles=cv(256,256,(gg,w,h)=>{gg.fillStyle='#3a3440';gg.fillRect(0,0,w,h);for(let r=0;r<4;r++)for(let c=0;c<4;c++){gg.fillStyle=`hsl(${R(250,275)},${R(6,14)}%,${R(30,42)}%)`;gg.fillRect(c*64+2,r*64+2,60,60);gg.fillStyle='rgba(255,255,255,.06)';gg.fillRect(c*64+2,r*64+2,60,5)}});
   ground(g,reg,T_tiles,6);const carpet=mk(new THREE.PlaneGeometry(4,RD-10),SM(0x6a0a18,{roughness:.8}),0,.02,(z0+z1)/2-4,g,false);carpet.rotation.x=-Math.PI/2;carpet.userData.keep=true;
@@ -251,6 +262,7 @@ const BUILD={
   signPost(g,reg,-3,z0-5,['CASTILLO DE LA CHATARRA. El último jefe te espera en el trono.','Las ARMADURAS paran los golpes de frente: ¡atácalas por la espalda o usa la llave de Aitor!','El REY DE LA CHATARRA dispara, embiste y llama a sus armaduras. ¡Tú puedes!']);
   checkpoint(g,reg,2,z0-6);secret(g,reg,51,-24,z0-36,Math.PI/2,0x4a4450,0);chest(g,reg,52,24,z0-22,-.5,'gems');
   sideWalls(g,reg,(x,z)=>{const w=mk(new THREE.BoxGeometry(2.4,6,3),wallM,x,3,z,g)});
+  pots(g,reg,7,(x,z)=>Math.abs(x)<3||z>z0-8||z<z1+22);
   placeMobs(reg,[['armadura',5],['murcielago',3,{col:0x3a2a5a}],['golem',1,{col:0x5a5a66,top:0x3a3a44,eye:0xff3a2a}],['slime',2,{col:0x9a5aff}]],(x,z)=>Math.abs(x)<3||z>z0-8||z<z1+22);placeBoss(reg)},
 };
 const PATH_A=(()=>{const c=document.createElement('canvas');c.width=64;c.height=4;const g=c.getContext('2d');const gr=g.createLinearGradient(0,0,64,0);gr.addColorStop(0,'#000');gr.addColorStop(.2,'#fff');gr.addColorStop(.8,'#fff');gr.addColorStop(1,'#000');g.fillStyle=gr;g.fillRect(0,0,64,4);return new THREE.CanvasTexture(c)})();

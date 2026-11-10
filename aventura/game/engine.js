@@ -20,7 +20,7 @@ const ren=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-perform
 ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;ren.outputEncoding=THREE.sRGBEncoding;ren.toneMapping=THREE.NoToneMapping;
 app.prepend(ren.domElement);
 const sc=new THREE.Scene();
-const cam=new THREE.PerspectiveCamera(44,1,.1,260);
+const cam=new THREE.PerspectiveCamera(44,1,.1,150);
 const hemi=new THREE.HemisphereLight(0xe6f4ff,0x3a6a1a,.14);sc.add(hemi);
 const sun=new THREE.DirectionalLight(0xfff0d0,2.0);sun.castShadow=true;
 Object.assign(sun.shadow.camera,{left:-22,right:22,top:22,bottom:-22,near:1,far:80});sun.shadow.bias=-.0004;sun.shadow.normalBias=.03;sc.add(sun);sc.add(sun.target);
@@ -76,13 +76,16 @@ function groundTex(base,specks,hues,extra){return cv(512,512,(g,w,h)=>{g.fillSty
   for(let i=0;i<specks;i++){g.fillStyle=`hsl(${R(hues[0],hues[1])},${hues[2]}%,${R(hues[3],hues[4])}%)`;g.fillRect(R(0,w),R(0,h),R(1,2.5),R(1.5,5))}if(extra)extra(g,w,h)})}
 
 /* ---------- materiales y mallas ---------- */
-const S=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6},o||{}));
-const P=(c,o)=>new THREE.MeshPhysicalMaterial(Object.assign({color:c,roughness:.32,clearcoat:1,clearcoatRoughness:.12},o||{}));
+/* los colores se escriben "a ojo" (sRGB) y se pasan a lineal para que salgan con su tono real */
+const LIN=c=>new THREE.Color(c).convertSRGBToLinear();
+function fixCols(o){if(!o)return o;const r=Object.assign({},o);if(typeof r.emissive==='number')r.emissive=LIN(r.emissive);return r}
+const S=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:LIN(c),roughness:.6},fixCols(o)));
+const P=(c,o)=>new THREE.MeshPhysicalMaterial(Object.assign({color:LIN(c),roughness:.32,clearcoat:1,clearcoatRoughness:.12},fixCols(o)));
 const matCache={};function SM(c,o){const k='S'+c+JSON.stringify(o||{});return matCache[k]||(matCache[k]=S(c,o))}
 function PM(c,o){const k='P'+c+JSON.stringify(o||{});return matCache[k]||(matCache[k]=P(c,o))}
 function mk(geo,mat,x=0,y=0,z=0,parent=sc,cast=true){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=cast;m.receiveShadow=true;parent.add(m);return m}
 function bumpy(geo,amt,f=5){const p=geo.attributes.position,v=new THREE.Vector3();for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);const n=1+(Math.sin(v.x*f+v.y*3.3)*.5+Math.sin(v.z*(f-.4)-v.y*2.1)*.5)*amt;p.setXYZ(i,v.x*n,v.y*n,v.z*n)}geo.computeVertexNormals();return geo}
-function shade(geo,top,bottom){const p=geo.attributes.position,c=new Float32Array(p.count*3),a=new THREE.Color(top),b=new THREE.Color(bottom),t=new THREE.Color();geo.computeBoundingBox();const bb=geo.boundingBox;
+function shade(geo,top,bottom){const p=geo.attributes.position,c=new Float32Array(p.count*3),a=LIN(top),b=LIN(bottom),t=new THREE.Color();geo.computeBoundingBox();const bb=geo.boundingBox;
   for(let i=0;i<p.count;i++){const k=(p.getY(i)-bb.min.y)/(bb.max.y-bb.min.y||1);t.copy(b).lerp(a,k);c[i*3]=t.r;c[i*3+1]=t.g;c[i*3+2]=t.b}geo.setAttribute('color',new THREE.BufferAttribute(c,3));return geo}
 const OUT=new THREE.MeshBasicMaterial({color:0x1a1018,side:THREE.BackSide});
 function outline(m,k=1.07){const o=new THREE.Mesh(m.geometry,OUT);o.scale.setScalar(k);o.userData.outline=true;m.add(o);return m}
