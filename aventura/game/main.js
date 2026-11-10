@@ -147,12 +147,12 @@ function lightTarget(r){return {fog:new THREE.Color(r.fog[0]),near:r.fog[1],far:
 let LT=null;function applyLight(t,k){LIT.fog.lerp(t.fog,k);LIT.sun.lerp(t.sun,k);LIT.hs.lerp(t.hs,k);LIT.hg.lerp(t.hg,k);LIT.near=lerp(LIT.near,t.near,k);LIT.far=lerp(LIT.far,t.far,k);LIT.si=lerp(LIT.si,t.si,k);LIT.expo=lerp(LIT.expo,t.expo,k);LIT.warm.lerp(t.warm,k);
   sc.fog.color.copy(LIT.fog);sc.fog.near=LIT.near;sc.fog.far=LIT.far;sun.color.copy(LIT.sun);sun.intensity=LIT.si;hemi.color.copy(LIT.hs);hemi.groundColor.copy(LIT.hg);
   if(finalPass){finalPass.uniforms.expo.value=LIT.expo;finalPass.uniforms.warm.value.copy(LIT.warm)}else ren.toneMappingExposure=LIT.expo}
-function enterRegion(i,instant){const r=REGIONS[i];GAME.reg=i;paintSky(r.sky);LT=lightTarget(r);if(instant)applyLight(LT,1);ambM.color.setHex(r.parts.col);ambM.size=r.parts.size;ambM.blending=r.parts.mode==='snow'||r.parts.mode==='dust'?THREE.NormalBlending:THREE.AdditiveBlending;ambM.needsUpdate=true;
+function enterRegion(i,instant){const r=REGIONS[i];GAME.reg=i;if(!instant&&GAME.state==='play'&&i>H.cp){H.cp=i;saveGame()}paintSky(r.sky);LT=lightTarget(r);if(instant)applyLight(LT,1);ambM.color.setHex(r.parts.col);ambM.size=r.parts.size;ambM.blending=r.parts.mode==='snow'||r.parts.mode==='dust'?THREE.NormalBlending:THREE.AdditiveBlending;ambM.needsUpdate=true;
   for(let k=0;k<AMB_N;k++)ambReset(k,false);REG_GROUPS.forEach((g,k)=>g.visible=Math.abs(k-i)<=1);if(!GAME.boss)Music.play(r.song);if(!instant)banner(r.sub,r.name)}
 
 /* ---------- bucle ---------- */
 const tmpV=new THREE.Vector3();let last=performance.now(),stepT=0,cpT=0;
-function step(dt){TIME+=dt;windU.value=TIME;ANIM.forEach(f=>f(dt));stepParts(dt);
+function step(dt){if(GAME.hitstop>0&&GAME.state==='play'){GAME.hitstop-=dt;return}TIME+=dt;windU.value=TIME;ANIM.forEach(f=>f(dt));stepParts(dt);
   if(GAME.state!=='play'){stepTitle(dt);return}
   if(GAME.dead){updateCam(dt);return}
   if(GAME.cine>0){GAME.cine-=dt;hero.position.set(H.x,0,H.z);animChar(hero,{time:TIME,moving:false,shield:false,swing:0,swingT:.3});const b=GAME.boss;if(b){b.t+=dt;b.g.position.set(b.x,b.y||0,b.z);b.g.rotation.y+=angDiff(Math.atan2(H.x-b.x,H.z-b.z),b.g.rotation.y)*dt*4;b.body.position.y=Math.abs(Math.sin(TIME*6))*.15}updateCam(dt);drawMini();return}
@@ -206,7 +206,8 @@ function stepTitle(dt){if(GAME.state==='title'){const a=TIME*.12;cam.position.se
     sun.position.set(TITLE_POS.x-9,20,TITLE_POS.z+9);sun.target.position.set(TITLE_POS.x,0,TITLE_POS.z)}
   if(GAME.state==='select'){lineup.forEach((m,i)=>{const u=m.userData;animChar(m,{time:TIME+i,moving:false,shield:false,swing:0,swingT:.3});u.body.position.y=i===selIdx?Math.abs(Math.sin(TIME*6))*.3:0;m.rotation.y=Math.sin(TIME*.8+i)*.25+(i===selIdx?Math.sin(TIME*3)*.3:0)});
     cam.position.set(1,3.0,-14.6);cam.lookAt(1,1.2,-20.5);sun.position.set(-8,20,-12);sun.target.position.set(1,0,-20.5)}}
-function showTitle(){GAME.state='title';document.body.classList.add('title');$('titleS').classList.add('on');$('contB').style.display=SAVE?'':'none';$('newB').textContent=SAVE?'NUEVA PARTIDA':'¡JUGAR!';Music.play('title')}
+function showTitle(){GAME.state='title';document.body.classList.add('title');$('titleS').classList.add('on');$('contB').style.display=SAVE?'':'none';
+  if(SAVE){const c=CHARS.find(q=>q.id===SAVE.char)||CHARS[0];$('contB').innerHTML='CONTINUAR<small>'+c.name+' · '+REGIONS[SAVE.cp||0].name+' · 🗝 '+SAVE.bosses.filter(Boolean).length+'/6</small>'}$('newB').textContent=SAVE?'NUEVA PARTIDA':'¡JUGAR!';Music.play('title')}
 function showSelect(fromPause){GAME.state='select';document.body.classList.add('title');$('titleS').classList.remove('on');$('pauseS').classList.remove('on');$('selS').classList.add('on');selIdx=-1;$('goB').classList.remove('on');
   document.querySelectorAll('.card').forEach(e=>e.classList.remove('pick'));if(hero)hero.visible=false;if(ghost)ghost.visible=false;
   if(!lineup.length)lineup=CHARS.map((c,i)=>{const m=makeChar(c);m.position.set(-2.4+i*1.7,0,-20.5);sc.add(m);return m});lineup.forEach(m=>m.visible=true);showSelect.from=fromPause}

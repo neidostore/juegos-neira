@@ -33,6 +33,7 @@ body.title .hud,body.title #joy,body.title .btn{display:none!important}
 .logo small{display:block;font-size:min(3.4vh,16px);color:#fff;letter-spacing:5px;text-shadow:0 2px 4px #000;margin-bottom:6px}
 .menu{display:flex;gap:12px;margin-top:4vh}
 .big{padding:12px 24px;border-radius:14px;border:0;background:linear-gradient(#ffd04a,#ff9a1a);color:#3a1a00;font-size:17px;box-shadow:0 5px 0 #a05a00,0 8px 16px rgba(0,0,0,.4)}
+.big small{display:block;font:800 10px system-ui;opacity:.8;margin-top:2px}
 .big:active{transform:translateY(3px);box-shadow:0 2px 0 #a05a00}
 .hint{position:absolute;bottom:12px;font:600 12px system-ui;opacity:.85;text-shadow:0 1px 3px #000;padding:0 20px}
 #selS{justify-content:space-between;padding:8px 0 10px}

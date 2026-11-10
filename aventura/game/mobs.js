@@ -96,7 +96,7 @@ function aimAt(m,sp,y=1){const dx=H.x-m.x,dz=H.z-m.z,d=Math.hypot(dx,dz)||1;retu
 /* golpe a un bicho */
 function hitMob(s,nx,nz,dmg){if(s.dead||s.hitT>.12)return;if(s.kind==='armadura'&&!s.boss&&s.state!=='stun'){const f=Math.sin(s.g.rotation.y)*-nx+Math.cos(s.g.rotation.y)*-nz;if(f>.55&&!(HC&&HC.dmg>1)){SFX.block();burst(s.x,1,s.z,0xffffff,6,2);s.hitT=.2;s.vx=nx*4;s.vz=nz*4;return}}
   if(s.state==='stun')dmg*=2;s.hp-=dmg;s.hitT=.28;const kb=s.boss?1.5:s.kind==='golem'?3:9;s.vx=nx*kb;s.vz=nz*kb;if(s.state==='charge'&&!s.boss){s.state='idle';s.st=1}
-  SFX.hit();burst(s.x,.8*s.scale+s.y,s.z,s.col,10,2);shake=Math.max(shake,s.boss?.12:.05);
+  SFX.hit();burst(s.x,.8*s.scale+s.y,s.z,s.col,10,2);GAME.hitstop=Math.max(GAME.hitstop||0,s.boss?.07:.045);shake=Math.max(shake,s.boss?.12:.05);
   if(s.hp<=0){s.dead=true;sc.remove(s.g);burst(s.x,.6+s.y,s.z,s.col,26,3);burst(s.x,.6+s.y,s.z,0xffffff,10,2);
     if(s.boss){onBossDefeated(s);return}
     dropGem(s.x,s.z,Math.min(4,s.max));if(Math.random()<.3)dropHeart(s.x,s.z);

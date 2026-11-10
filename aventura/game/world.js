@@ -137,6 +137,7 @@ const BUILD={
  bosque(g,reg){const [z0,z1]=regZ(reg);ground(g,reg,groundTex('#4fb836',9000,[85,118,62,30,52]),12);
   const RX=-15;const riverAvoid=(x,z)=>Math.abs(x-RX)<4.2;
   water(g,RX,(z0+z1)/2,6,RD,0x1a8ae8);const bed=mk(new THREE.PlaneGeometry(6.6,RD),SM(0x2a5a7a,{roughness:1}),RX,.02,(z0+z1)/2,g,false);bed.rotation.x=-Math.PI/2;
+  [-1,1].forEach(sd=>{const f=mk(new THREE.PlaneGeometry(.8,RD),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.5,depthWrite:false}),RX+sd*2.9,.075,(z0+z1)/2,g,false);f.rotation.x=-Math.PI/2;f.userData.keep=true;ANIM.push(()=>{f.material.opacity=.35+Math.sin(TIME*1.5+sd)*.15})});
   const BZ=z0-38;addBox(reg,RX-3,RX+3,z0-RD,BZ-2.4);addBox(reg,RX-3,RX+3,BZ+2.4,z0);
   for(let i=0;i<36;i++){const sd=i%2?1:-1;rock(g,reg,RX+sd*RS(3.3,4.3),z0-1-i*2+RS(-.6,.6),RS(.35,.75),0x9a9aa6,RS(0,1)<.5?0x4f9a34:0,false)}
   const br=new THREE.Group();const wm=SM(0xffffff,{map:T_wood,roughness:.75});for(let i=0;i<9;i++)mk(new THREE.BoxGeometry(9,.18,.62),wm,0,.42,-2.6+i*.66,br);

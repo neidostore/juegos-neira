@@ -1,6 +1,6 @@
 // Juegos Neira: guarda los juegos en el móvil para jugar sin internet
 // y descarga las versiones nuevas en cuanto hay conexión.
-const CACHE='juegos-neira-v10';
+const CACHE='juegos-neira-v11';
 self.addEventListener('install',e=>self.skipWaiting());
 self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
 self.addEventListener('fetch',e=>{
